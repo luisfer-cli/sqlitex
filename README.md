@@ -2,6 +2,9 @@
 
 **Turn any SQLite database into a documented, queryable knowledge base — from your terminal.**
 
+[![Docker Hub](https://img.shields.io/docker/v/luisfercli/sqlitex?label=docker%20hub&logo=docker)](https://hub.docker.com/r/luisfercli/sqlitex)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 SQLiteX is a 100% CLI Python tool that inspects a SQLite database, understands its tables, columns, relationships, and the data they hold, and then lets you ask business questions in plain language. It uses an LLM to generate read-only SQL, runs it safely, and explains the result.
 
 No dashboards. No notebooks. No vector database to operate. Just your `.sqlite` file, a model endpoint, and questions.
@@ -65,26 +68,38 @@ uv run python -m sqlitex --help
 
 A multi-stage `Dockerfile` is included. It installs SQLiteX into an isolated virtual environment, runs as a non-root user, and uses `/data` as the working volume.
 
-Build the image:
+Pull the published image:
+
+```bash
+docker pull luisfercli/sqlitex:latest
+docker run --rm luisfercli/sqlitex:latest version
+docker run --rm luisfercli/sqlitex:latest --help
+```
+
+Also available as `luisfercli/sqlitex:0.1.0`.
+
+Or build it locally:
 
 ```bash
 docker build -t sqlitex .
 ```
 
-Run the CLI:
+The examples below use an `IMAGE` variable, so they work with either source:
 
 ```bash
-docker run --rm sqlitex --help
-docker run --rm sqlitex version
+IMAGE=luisfercli/sqlitex:latest   # or IMAGE=sqlitex after a local build
+
+docker run --rm "$IMAGE" --help
+docker run --rm "$IMAGE" version
 ```
 
 Use a host directory for the database and local state:
 
 ```bash
 mkdir -p data
-docker run --rm -v "$PWD/data:/data" sqlitex demo /data/demo.sqlite
-docker run --rm -v "$PWD/data:/data" sqlitex init /data/demo.sqlite
-docker run --rm -v "$PWD/data:/data" sqlitex ask "which products sold the most units?" --db /data/demo.sqlite
+docker run --rm -v "$PWD/data:/data" "$IMAGE" demo /data/demo.sqlite
+docker run --rm -v "$PWD/data:/data" "$IMAGE" init /data/demo.sqlite
+docker run --rm -v "$PWD/data:/data" "$IMAGE" ask "which products sold the most units?" --db /data/demo.sqlite
 ```
 
 `SQLITEX_HOME` defaults to `/data/.sqlitex` inside the container, so catalogs and indexes persist in the mounted directory.
@@ -97,7 +112,7 @@ docker run --rm -it \
   -e SQLITEX_API_BASE_URL \
   -e SQLITEX_API_KEY \
   -e SQLITEX_MODEL \
-  sqlitex ask "how many customers are there?" --db /data/demo.sqlite
+  "$IMAGE" ask "how many customers are there?" --db /data/demo.sqlite
 ```
 
 The container runs as UID/GID `1000`. If your host user has different IDs, add `--user "$(id -u):$(id -g)"` so generated files stay writable on the host. The entrypoint is `sqlitex`; use `--entrypoint bash` if you need a shell inside the image.
