@@ -5,7 +5,7 @@ description = "Explore SQLite databases and query them in natural language (RAG 
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
-authors = [{ name = "Luis" }]
+authors = [{ name = "Luis Fernando Rodríguez Vargas" }]
 keywords = ["sqlite", "cli", "rag", "nl2sql", "llm", "data"]
 dependencies = [
     "typer>=0.15",
