@@ -61,6 +61,49 @@ Or run it without installing:
 uv run python -m sqlitex --help
 ```
 
+## Docker
+
+A multi-stage `Dockerfile` is included. It installs SQLiteX into an isolated virtual environment, runs as a non-root user, and uses `/data` as the working volume.
+
+Build the image:
+
+```bash
+docker build -t sqlitex .
+```
+
+Run the CLI:
+
+```bash
+docker run --rm sqlitex --help
+docker run --rm sqlitex version
+```
+
+Use a host directory for the database and local state:
+
+```bash
+mkdir -p data
+docker run --rm -v "$PWD/data:/data" sqlitex demo /data/demo.sqlite
+docker run --rm -v "$PWD/data:/data" sqlitex init /data/demo.sqlite
+docker run --rm -v "$PWD/data:/data" sqlitex ask "which products sold the most units?" --db /data/demo.sqlite
+```
+
+`SQLITEX_HOME` defaults to `/data/.sqlitex` inside the container, so catalogs and indexes persist in the mounted directory.
+
+Pass provider settings without baking secrets into the image:
+
+```bash
+docker run --rm -it \
+  -v "$PWD/data:/data" \
+  -e SQLITEX_API_BASE_URL \
+  -e SQLITEX_API_KEY \
+  -e SQLITEX_MODEL \
+  sqlitex ask "how many customers are there?" --db /data/demo.sqlite
+```
+
+The container runs as UID/GID `1000`. If your host user has different IDs, add `--user "$(id -u):$(id -g)"` so generated files stay writable on the host. The entrypoint is `sqlitex`; use `--entrypoint bash` if you need a shell inside the image.
+
+`-e VAR` reads the value from your shell. If you prefer a file, use `--env-file .env.docker`; Docker does not expand `${...}` references there, so the values must be literal.
+
 ## Quickstart
 
 1. Configure an AI provider:
@@ -313,6 +356,8 @@ scripts/
   eval_data.py    synthetic evaluation databases
   eval_live.py    end-to-end benchmark
 tests/
+Dockerfile        multi-stage production image
+.dockerignore     minimal build context
 ```
 
 ## Development

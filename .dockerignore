@@ -1,0 +1,38 @@
+# Git and CI metadata
+.git
+.github
+.gitignore
+
+# Local environment and secrets
+.env
+.env.*
+.venv
+venv
+
+# Python caches and build artifacts
+__pycache__
+*.py[cod]
+*.egg-info
+dist
+build
+.pytest_cache
+.ruff_cache
+.mypy_cache
+.coverage
+.coverage.*
+htmlcov
+
+# Local SQLiteX state and data
+.sqlitex
+*.sqlite
+*.sqlite3
+*.db
+*.sqlite-*
+*.sqlite3-*
+*.db-*
+
+# Evaluation and development assets not needed in the image
+eval-results
+tests
+scripts
+EVALUATION.md
