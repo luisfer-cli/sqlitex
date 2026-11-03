@@ -268,18 +268,28 @@ SQLiteX reads `.env` from the current directory (or its parents) and process env
 
 ## How it works
 
-```
-┌─────────────┐    ┌──────────────────┐    ┌──────────────────────┐
-│  init       │    │  catalog         │    │  RAG index           │
-│  introspection├──▶│  .catalog.json   │───▶│  documents +         │
-│  + AI       │    │  (semantics)     │    │  embeddings / BM25   │
-└─────────────┘    └──────────────────┘    └──────────┬───────────┘
-                                                     │
-┌─────────────┐    ┌──────────────────┐    ┌──────────▼───────────┐
-│  natural-   │◀───│  read-only SQL   │◀───│  ask: retrieve       │
-│  language   │    │  execution with  │    │  context + generate  │
-│  answer     │    │  limits          │    │  SQL with the model  │
-└─────────────┘    └──────────────────┘    └──────────────────────┘
+```mermaid
+flowchart TD
+    subgraph INIT [init]
+        DB[(SQLite database)] --> SCHEMA["Introspect<br/>tables · relationships · indexes<br/>profiles · sample rows"]
+        SCHEMA --> AI["Annotate with AI<br/>table and column semantics<br/>global summary"]
+        AI --> CATALOG["Catalog<br/>.catalog.json"]
+        CATALOG --> INDEX["Build RAG index<br/>documents + embeddings / BM25"]
+    end
+
+    subgraph ASK [ask]
+        Q["Natural-language question"] --> RETRIEVE["Retrieve relevant tables<br/>and hydrate context"]
+        RETRIEVE --> PLAN["Plan the answer<br/>SQL or catalog response"]
+        PLAN -->|needs data| EXEC["Validate and execute SQL<br/>read-only · timeout · row limit"]
+        EXEC -->|SQL error| REPAIR["Repair SQL<br/>with the error message"]
+        REPAIR --> EXEC
+        EXEC --> ANSWER["Write the answer<br/>from result rows"]
+        PLAN -->|schema question| ANSWER
+        ANSWER --> OUT["Answer · executed SQL · follow-ups"]
+    end
+
+    INDEX -.-> RETRIEVE
+    CATALOG -.-> RETRIEVE
 ```
 
 1. **Introspection** (`introspect.py`): reads schema via `pragma_table_info`, `pragma_foreign_key_list`, `pragma_index_list`, etc.; counts rows with a timeout; samples rows; profiles columns on a sample to avoid blocking large databases.
