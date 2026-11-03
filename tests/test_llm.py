@@ -31,7 +31,7 @@ def test_extract_json_ignores_invalid_prefix():
     assert extract_json('texto {no} luego {"ok": true}') == {"ok": True}
 
 
-@pytest.mark.parametrize("text", ["", "   ", "sin json", "```\n```"])
+@pytest.mark.parametrize("text", ["", "   ", "not json", "```\n```"])
 def test_extract_json_fails(text):
     with pytest.raises(ValueError):
         extract_json(text)
@@ -75,7 +75,7 @@ def test_chat_json_repairs_invalid_json(settings):
 def test_chat_json_gives_up(settings):
     class Canned(LLMClient):
         def _chat_once(self, messages, *, temperature=None, label="chat"):
-            return "sigue sin ser json"
+            return "still not json"
 
     client = Canned(settings)
     with pytest.raises(LLMError, match="valid JSON"):

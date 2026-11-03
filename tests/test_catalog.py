@@ -51,7 +51,7 @@ def test_resolve_single_catalog(catalog, demo_db, settings):
 
 def test_resolve_missing_catalog(settings, tmp_path):
     with pytest.raises(CatalogError, match="init"):
-        resolve_catalog(settings, tmp_path / "sin-catalogo.sqlite")
+        resolve_catalog(settings, tmp_path / "no-catalog.sqlite")
 
 
 def test_resolve_multiple_catalogs(catalog, settings, tmp_path):

@@ -109,9 +109,9 @@ def test_env_file_path_returns_none_without_env(tmp_path, monkeypatch):
 
 def test_env_file_is_loaded(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    (tmp_path / ".env").write_text("SQLITEX_MAX_ROWS=11\nSQLITEX_MODEL=desde-env\n", encoding="utf-8")
+    (tmp_path / ".env").write_text("SQLITEX_MAX_ROWS=11\nSQLITEX_MODEL=from-env\n", encoding="utf-8")
     settings = settings_from_env(None, home="x")
     assert settings.max_rows == 11
-    assert settings.model == "desde-env"
+    assert settings.model == "from-env"
     assert env_file_path() == tmp_path / ".env"
     assert isinstance(settings.home, Path)

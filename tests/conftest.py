@@ -48,7 +48,7 @@ def catalog(demo_db, settings):
 
 
 class FakeLLM:
-    """Cliente LLM determinista para tests, sin red."""
+    """Deterministic LLM client for tests, no network."""
 
     available = True
 
@@ -61,7 +61,7 @@ class FakeLLM:
     def chat_json(self, system: str, user: str, schema, **kwargs):
         self.calls.append({"system": system, "user": user, "schema": schema, **kwargs})
         if not self.responses:
-            raise LLMError("FakeLLM sin respuestas configuradas.")
+            raise LLMError("FakeLLM has no responses configured.")
         item = self.responses.pop(0)
         if isinstance(item, Exception):
             raise item
